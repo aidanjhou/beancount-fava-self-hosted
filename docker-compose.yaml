@@ -1,0 +1,25 @@
+
+services:
+  beancount-fava-self-hosted:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: beancount-fava-self-hosted:latest
+    restart: unless-stopped
+    ports:
+      - "${FAVA_HOST_PORT:-1818}:${FAVA_PORT:-8000}"
+    environment:
+      - FAVA_HOST=${FAVA_HOST:-0.0.0.0}
+      - FAVA_PORT=${FAVA_PORT:-8000}
+      - BEANCOUNT_FILE=${BEANCOUNT_FILE:-/data/main.beancount}
+    volumes:
+      - fava-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:${FAVA_PORT:-8000}/')\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  fava-data:

@@ -1,47 +1,54 @@
 # Deploying with Docker
 
-## Basic
+## Quick Start (Docker Compose)
 
-The Dockerfile in this directory is enough to get started running Fava in a
-container. This guide is meant as a compliment to the great documentation found
-at https://docs.docker.com/.
+The repository root provides a `Dockerfile` and companion `docker-compose.yaml` for out-of-the-box deployment.
+
+To start Fava with Docker Compose from the repository root:
+
+```bash
+docker-compose up -d
+```
+
+Your Fava web interface will immediately be available at http://localhost:1818/. Data is persisted automatically in the `fava-data` Docker volume. You can initialize your accounts and ledger directly via Fava's web UI (using online import or the built-in editor).
+
+To view logs:
+
+```bash
+docker-compose logs -f
+```
+
+To stop the service:
+
+```bash
+docker-compose down
+```
+
+## Basic (Docker CLI)
+
+You can also build and run using standard Docker commands:
 
 ### Building
 
-To build the image using the provided Dockerfile run this command:
-
+```bash
+docker build -t beancount-fava-self-hosted .
 ```
-docker build -t fava .
-```
-
-This will build everything and name the image `fava`. Because docker depends
-heavily on caching to improve efficiency, to incorporate a new version of
-Beancount or Fava you must use the `--no-cache` flag when rebuilding the image.
 
 ### Deploying
 
-To run the Fava container, use this command:
-
-```
-docker run --detach --name="beancount" --publish 5000:5000 \
-  --volume $(pwd)/example.beancount:/input.beancount \
-  --env BEANCOUNT_FILE=/input.beancount fava
+```bash
+docker run --detach --name="beancount" --publish 1818:8000 \
+  --volume fava-data:/data beancount-fava-self-hosted
 ```
 
 Let's look at each argument independently:
 
-1. `--detach` tells Docker to start the image and run it in the background as a
-   daemon.
-1. `--name` specifies a name to give the Docker instance instead of generating a
-   random id. This will be used later.
-1. `--publish` tells Docker to expose the container's port 5000 as the local
-   machine's port 5000. This allows us to access Fava with the url
-   http://localhost:5000/.
-1. `--volume` tells Docker to share the example.beancount file in the current
-   directory to the container as the file `/input.beancount`.
-1. `--env` tells Fava where to find the Beancount file.
+1. `--detach` tells Docker to start the image and run it in the background as a daemon.
+1. `--name` specifies a name to give the Docker instance instead of generating a random id.
+1. `--publish` tells Docker to expose the container's port 8000 as the local machine's port 1818.
+1. `--volume` mounts the persistent Docker volume `fava-data` into the container's `/data`.
 
-Going to http://localhost:5000/ will display your Fava instance.
+Going to http://localhost:1818/ will display your Fava instance.
 
 ## Advanced
 
@@ -91,7 +98,7 @@ redirect_url = "https://bean.xennet.org/oauth2/callback"
 
 ## the http url(s) of the upstream endpoint. If multiple, routing is based on path
 upstreams = [
-    "http://beancount:5000/"
+    "http://beancount:8000/"
 ]
 
 ## Log requests to stdout
@@ -172,7 +179,7 @@ Let's document the new arguments:
 
 1. `--link` tells docker to link one container to another, so they can access
    each other's exposed ports, and properly set up hostname mappings. This is
-   why `upstreams` in the oauth2_proxy config is `http://beancount:5000`.
+   why `upstreams` in the oauth2_proxy config is `http://beancount:8000`.
 1. `--volume` maps host paths into docker instances. This is one way of getting
    data into a docker instance.
 1. `--env` sets arbitrary environment values in docker instances. We will use
