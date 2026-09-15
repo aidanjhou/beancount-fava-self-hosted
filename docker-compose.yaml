@@ -14,6 +14,8 @@ services:
       - BEANCOUNT_FILE=${BEANCOUNT_FILE:-/data/main.beancount}
     volumes:
       - fava-data:/data
+      - ./import_config.py:/data/import_config.py
+
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:${FAVA_PORT:-8000}/')\" || exit 1"]
       interval: 30s

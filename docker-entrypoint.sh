@@ -7,6 +7,11 @@ mkdir -p "$DATA_DIR/imports"
 
 export BEANCOUNT_FILE="${BEANCOUNT_FILE:-$DATA_DIR/main.beancount}"
 
+# Ensure default import_config.py is present
+if [ ! -f "$DATA_DIR/import_config.py" ] && [ -f "/etc/fava/import_config.py" ]; then
+    cp /etc/fava/import_config.py "$DATA_DIR/import_config.py"
+fi
+
 # If running default fava command and BEANCOUNT_FILE doesn't exist, create initial ledger for online import
 if [ "$1" = "fava" ] || [ -z "$1" ]; then
     if [ ! -f "$BEANCOUNT_FILE" ]; then
@@ -19,10 +24,11 @@ option "operating_currency" "CNY"
 ; Automatically declare accounts when new transactions are imported
 plugin "beancount.plugins.auto_accounts"
 
-; Primary folder for uploading and importing statement files via Fava UI
+; Primary import configuration and folders for statement files via Fava UI
+2026-01-01 custom "fava-option" "import-config" "import_config.py"
 2026-01-01 custom "fava-option" "import-dirs" "imports"
 EOF
-        echo "[entrypoint] Initial ledger created. Users can initialize accounts via online import."
+        echo "[entrypoint] Initial ledger created. Out-of-the-box bill importers configured."
     fi
     [ -z "$1" ] && set -- fava
     exec "$@"

@@ -15,9 +15,11 @@ VOLUME ["/data"]
 
 EXPOSE 8000
 
-# Copy entrypoint script
+# Copy default import configuration and entrypoint script
+COPY import_config.py /etc/fava/import_config.py
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["fava"]
+
